@@ -1,0 +1,60 @@
+packages: 
+
+substitutions:
+
+esphome:
+  name: ${display_name}
+  friendly_name: ${display_friendly_name}
+  comment: embiontec Wall display
+  includes:
+    - <sstream>
+    - <algorithm>
+  platformio_options:
+    board_build.flash_mode: dio
+
+  on_boot:
+    - priority: 400
+      then:
+        - lambda: |-
+            id(i18n_translations).set_current_locale(id(current_language));
+        #- script.execute: update_loading_pageota_password
+        - script.execute: update_loading_page
+    - priority: -100
+      then:
+        - lvgl.roller.update:
+            id: backlight_settings_sleep_time_roller
+            selected_index: !lambda return id(display_timeout);
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  cpu_frequency: 240MHz
+  framework:
+    type: esp-idf
+    advanced:
+      loop_task_stack_size: 8192
+    sdkconfig_options:
+      # CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP: y
+      # CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
+      # CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+      # CONFIG_ESP_MAIN_TASK_STACK_SIZE: "16384"
+      # CONFIG_ESP_MAIN_TASK_STACK_SIZE: "65536"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
+      CONFIG_SPIRAM_RODATA: y
+      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "60"
+      # CONFIG_FREERTOS_USE_TRACE_FACILITY: "y"
+      # CONFIG_FREERTOS_USE_STATS_FORMATTING_FUNCTIONS: "y"
+      # CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS: "y"
+      # CONFIG_FREERTOS_RUN_TIME_STATS_USING_ESP_TIMER: "y"
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+
+  logger:
+  level: debug
+  logs:
+    lvgl: info
+  hardware_uart: UART0
